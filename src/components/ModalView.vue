@@ -8,8 +8,23 @@
 </template>
 
 <script>
+import { onBeforeUnmount } from "vue";
+
 export default {
   setup(props, { emit }) {
+    let onKeydown = e => {
+      console.log(e.key);
+      if (e.key === "Escape") {
+        emit("closeModal");
+      }
+    };
+
+    window.addEventListener("keydown", onKeydown);
+
+    onBeforeUnmount(() => {
+      window.removeEventListener("keydown", onKeydown);
+    });
+
     return {
       emit
     };
