@@ -1,10 +1,12 @@
 <template>
   <div class="email-display">
     <div>
-      <button @click="toggleArchive">{{email.archived ? 'Move to inbox (e)' : 'Archive (e)'}}</button>
+      <button @click="toggleArchive">
+        {{ email.archived ? "Move to inbox (e)" : "Archive (e)" }}
+      </button>
       <button @click="toggleRead">{{ email.read ? "Mark unread (r)" : "Mark read (r)" }}</button>
-      <button>Newer</button>
-      <button>Older</button>
+      <button @click="goNewer">Newer (k)</button>
+      <button @click="goOlder">Older (j)</button>
     </div>
     <h2 class="mb-0">
       Subject: <strong>{{ email.subject }}</strong>
@@ -19,35 +21,61 @@
 <script>
 import format from "date-fns/format";
 import marked from "marked";
-import axios from "axios";
-import useKeyDown from "@/composables/useKeyDown";
+import useKeyDown from "@/composables/use-keydown";
+import { inject } from "vue";
 
 export default {
+  // inject: ["$axios"],
   props: {
     email: {
       type: Object,
       required: true
     }
   },
-  setup(props) {
+  setup(props, { emit }) {
+    const $axios = inject("$axios");
+
     useKeyDown("r", () => toggleRead());
     useKeyDown("e", () => toggleArchive());
+    useKeyDown("k", () => goNewer());
+    useKeyDown("j", () => goOlder());
+    useKeyDown("[", () => goNewerAndArchive());
+    useKeyDown("]", () => goOlderAndArchive());
 
     let toggleRead = () => {
-      props.email.read = !props.email.read;
-      axios.put(`http://localhost:3000/emails/${props.email.id}`, props.email);
+      emit("changeEmail", {toggleRead : true, save: true});
     };
 
     let toggleArchive = () => {
-      props.email.archived = !props.email.archived;
-      axios.put(`http://localhost:3000/emails/${props.email.id}`, props.email);
+      emit("changeEmail", {toggleArchive : true, save: true, closeModal: true});
+    };
+
+    let goNewer = () => {
+      emit("changeEmail", {changeIndex: -1});
+    };
+
+    let goOlder = () => {
+      emit("changeEmail", {changeIndex: 1});
+    };
+
+    let goNewerAndArchive = () => {
+      emit("changeEmail", {changeIndex: -1, toggleArchive: true, save: true});
+    };
+
+    let goOlderAndArchive = () => {
+      emit("changeEmail", {changeIndex: 1, toggleArchive: true, save: true});
     };
 
     return {
       format,
       marked,
       toggleRead,
-      toggleArchive
+      toggleArchive,
+      goNewer,
+      goOlder,
+      goNewerAndArchive,
+      goOlderAndArchive,
+      $axios
     };
   },
   methods: {}
