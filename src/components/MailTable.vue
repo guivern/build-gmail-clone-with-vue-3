@@ -10,7 +10,7 @@
         <td>
           <input
             type="checkbox"
-            @click="toggleEmailSelection(email)"
+            @click="toggleSelectedEmails(email)"
             :selected="selectedEmails.has(email)"
           />
         </td>
@@ -37,6 +37,8 @@ import format from "date-fns/format";
 import { inject, reactive } from "vue";
 import MailView from "./MailView.vue";
 import ModalView from "./ModalView.vue";
+import useEmailSelection from "../composables/use-email-selecttion";
+
 export default {
   components: {
     MailView,
@@ -45,27 +47,20 @@ export default {
   async setup() {
     const $axios = inject("$axios");
     let { data: emails } = await $axios.get("emails");
-
+  
     return {
       format,
       emails,
-      $axios
+      $axios,
+      ...useEmailSelection()
     };
   },
   data() {
     return {
-      selectedEmails: new Set(),
       openedEmail: null
     };
   },
   methods: {
-    toggleEmailSelection(email) {
-      if (this.selectedEmails.has(email)) {
-        this.selectedEmails.delete(email);
-      } else {
-        this.selectedEmails.add(email);
-      }
-    },
     changeEmail({ toggleRead, toggleArchive, save, closeModal, changeIndex }) {
       let email = this.openedEmail;
 
