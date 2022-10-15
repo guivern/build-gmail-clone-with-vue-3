@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 
 // se saca afuera para poder persistir el estado si es utilizado por otros componentes
+// caso contrario, siempre que se ejecute la funcion, se reiniciara el estado
 let selectedEmails = reactive(new Set());
 
 export default function useEmailSelection() {
@@ -12,8 +13,18 @@ export default function useEmailSelection() {
     }
   };
 
+  let clear = function() {
+    this.selectedEmails.clear();
+  }
+
+  let addMultiple = function(emails) {
+    emails.forEach(email => this.selectedEmails.add(email));
+  }
+
   return {
     selectedEmails,
-    toggleSelectedEmails
+    toggleSelectedEmails,
+    clear,
+    addMultiple
   };
 }
