@@ -1,6 +1,6 @@
 <template>
   <bulk-action-bar :emails="unarchiveEmails" />
-  <h1>{{ selectedEmails.size }} Emails selected</h1>
+  <!-- <h1>{{ selectedEmails.size }} Emails selected</h1> -->
   <table class="mail-table">
     <tbody>
       <tr

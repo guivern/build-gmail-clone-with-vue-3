@@ -1,11 +1,22 @@
 <template>
-  <div>
-    <input
-      type="checkbox"
-      :checked="allEmailsSelected"
-      :class="[someEmailsSelected ? 'partial-check' : '']"
-      @click="bulkSelectEmails"
-    />
+  <div class="bulk-action-bar">
+    <span class="checkbox">
+      <input
+        type="checkbox"
+        :checked="allEmailsSelected"
+        :class="[someEmailsSelected ? 'partial-check' : '']"
+        @click="bulkSelectEmails"
+      />
+    </span>
+    <span class="buttons">
+      <button @click="markRead" :disabled="[...selectedEmails].every(x => x.read)">
+        Mark read
+      </button>
+      <button @click="markUnread" :disabled="[...selectedEmails].every(x => !x.read)">
+        Mark unread
+      </button>
+      <button @click="archive" :disabled="selectedEmails.size === 0">Archive</button>
+    </span>
   </div>
 </template>
 
@@ -37,7 +48,11 @@ export default {
     return {
       allEmailsSelected,
       someEmailsSelected,
-      bulkSelectEmails
+      bulkSelectEmails,
+      selectedEmails: emailSelection.selectedEmails,
+      markRead: emailSelection.markRead,
+      markUnread: emailSelection.markUnread,
+      archive: emailSelection.archive
     };
   }
 };
