@@ -1,10 +1,12 @@
 <template>
-  <bulk-action-bar :emails="unarchiveEmails" />
+  <button @click="selectScreen('inbox')" :disabled="selectedView === 'inbox'">Inbox</button>
+  <button @click="selectScreen('archive')" :disabled="selectedView === 'archive'">Archive</button>
+  <bulk-action-bar :emails="filteredEmails" />
   <!-- <h1>{{ selectedEmails.size }} Emails selected</h1> -->
   <table class="mail-table">
     <tbody>
       <tr
-        v-for="email in unarchiveEmails"
+        v-for="email in filteredEmails"
         :key="email.id"
         :class="['clickable', email.read ? 'read' : '']"
       >
@@ -50,11 +52,13 @@ export default {
   async setup() {
     const $axios = inject("$axios");
     let { data: emails } = await $axios.get("emails");
+    let selectedView = reactive("inbox");
 
     return {
       format,
       emails,
       $axios,
+      selectedView,
       ...useEmailSelection()
     };
   },
@@ -64,6 +68,10 @@ export default {
     };
   },
   methods: {
+    selectScreen(screen) {
+      this.selectedView = screen;
+      this.clear();
+    },
     changeEmail({ toggleRead, toggleArchive, save, closeModal, changeIndex }) {
       let email = this.openedEmail;
 
@@ -72,8 +80,8 @@ export default {
       if (save) this.updateEmail(email);
       if (closeModal) this.openedEmail = null;
       if (changeIndex) {
-        let index = this.unarchiveEmails.indexOf(email);
-        let newEmail = this.unarchiveEmails[index + changeIndex];
+        let index = this.filteredEmails.indexOf(email);
+        let newEmail = this.filteredEmails[index + changeIndex];
         this.openEmail(newEmail);
       }
     },
@@ -98,8 +106,12 @@ export default {
         return new Date(b.sentAt) - new Date(a.sentAt);
       });
     },
-    unarchiveEmails() {
-      return this.sortedEmails.filter(email => !email.archived);
+    filteredEmails() {
+      if (this.selectedView === "inbox") {
+        return this.sortedEmails.filter(email => !email.archived);
+      } else {
+        return this.sortedEmails.filter(email => email.archived);
+      }
     }
   }
 };
